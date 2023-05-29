@@ -1,10 +1,12 @@
 const User = require("../models/User");
 
 async function showHome(req, res) {
-  const followings = req.user.following;
   const tweets = [];
-  for (let i = 0; i < followings.length; i++) {
-    const followingTweets = await User.findById(followings[i]).populate("tweets");
+  console.log(req.user);
+  const user = await User.findById(req.user.userId);
+
+  for (let i = 0; i < user.following.length; i++) {
+    const followingTweets = await User.findById(user.following[i]).populate("tweets");
     tweets.push(followingTweets.tweets);
   }
 

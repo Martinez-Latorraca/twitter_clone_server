@@ -1,5 +1,5 @@
 const LocalStrategy = require("passport-local").Strategy;
-
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 
@@ -17,9 +17,12 @@ module.exports = function (passport) {
           if (!user || !checkPass) {
             return done(null, false, { message: "Credenciales incorrectas" });
           }
-          return done(null, user);
+          const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET_KEY, {
+            expiresIn: "1h",
+          });
+          return done(null, user, { token });
         } catch (error) {
-          console.log(error);
+          // console.log(error);
         }
       },
     ),

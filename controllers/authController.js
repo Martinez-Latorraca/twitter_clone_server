@@ -5,23 +5,24 @@ const bcrypt = require("bcryptjs");
 function login(req, res) {
   passport.authenticate("local", function (err, user, info) {
     if (err) {
-      console.log(err); // Imprime el error en la consola para ver más detalles
       req.flash("info", "Error de autenticación: " + err.message); // Agrega un mensaje de flash con el error
-      return res.redirect("/login");
+      return res.status(401).send("Bad Credentials");
     }
 
     if (!user) {
       req.flash("info", "Credenciales incorrectas, intenta nuevamente.");
-      return res.redirect("/login");
+      return res.status(401).send("Bad Credentials");
     }
 
     req.logIn(user, function (err) {
       if (err) {
-        console.log(err); // Imprime el error en la consola para ver más detalles
         req.flash("info", "Error de autenticación: " + err.message); // Agrega un mensaje de flash con el error
-        return res.redirect("/login");
+        return res.status(401).send("Bad Credentials");
       }
-      return res.redirect("/");
+      const token = info.token;
+      const userToFront = { ...user._doc, token: token }; // Asigno el user para quitarle el pass y agregar el token para mandarlo al front
+      delete userToFront.password;
+      return res.json(userToFront);
     });
   })(req, res);
 }
@@ -54,6 +55,7 @@ async function logOut(req, res) {
     if (err) {
       return next(err);
     }
+    console.log("loged out");
     return res.redirect("/login");
   });
 }
